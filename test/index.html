@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HDR Off — banc d'essai</title>
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=IBM+Plex+Mono:wght@400;600&display=swap");
+
+  :root {
+    --paper: #f4f1ea;
+    --ink: #16150f;
+    --faint: #7d7767;
+    --rule: #d8d2c4;
+    --flag: #b4331f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Fraunces, Georgia, serif;
+    line-height: 1.62;
+    padding: 0 24px 90px;
+  }
+
+  .wrap { max-width: 680px; margin: 0 auto; }
+
+  header {
+    border-bottom: 3px double var(--ink);
+    padding: 40px 0 18px;
+    margin-bottom: 30px;
+  }
+
+  .kicker {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 2.4px;
+    text-transform: uppercase;
+    color: var(--flag);
+    margin-bottom: 12px;
+  }
+
+  h1 {
+    font-size: clamp(34px, 6.4vw, 56px);
+    line-height: 1.03;
+    letter-spacing: -1.6px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  .standfirst { font-size: 18px; color: var(--faint); font-style: italic; }
+
+  .console {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    border: 1px solid var(--rule);
+    background: #fbf9f4;
+    padding: 16px 18px;
+    margin: 28px 0 36px;
+  }
+
+  .diag { display: flex; gap: 8px; padding: 3px 0; }
+  .diag b { font-weight: 600; min-width: 128px; color: var(--faint); }
+
+  .btns { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+  button {
+    font-family: inherit;
+    font-size: 11px;
+    letter-spacing: .4px;
+    padding: 8px 13px;
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: background .14s, color .14s;
+  }
+  button:hover { background: var(--ink); color: var(--paper); }
+  button[aria-pressed="true"] { background: var(--flag); border-color: var(--flag); color: #fff; }
+
+  p { margin-bottom: 19px; font-size: 17.5px; }
+  p:first-of-type::first-letter {
+    float: left;
+    font-size: 66px;
+    line-height: .82;
+    padding: 6px 9px 0 0;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 24px;
+    letter-spacing: -.5px;
+    margin: 36px 0 15px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+  }
+
+  figure { margin: 40px 0; }
+  figure img { width: 100%; display: block; }
+
+  figcaption {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--faint);
+    padding-top: 9px;
+    border-top: 1px solid var(--rule);
+    margin-top: 9px;
+  }
+
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .duo figcaption { border-top: 0; padding-top: 6px; margin-top: 4px; text-align: center; }
+
+  /* Jumeau SDR : meme dessin, reconstruit en CSS, donc borne au blanc ecran. */
+  .twin {
+    aspect-ratio: 1;
+    background: linear-gradient(45deg, #e9e9ea 0%, #f7cfcc 100%);
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  .twin::after {
+    content: "";
+    width: 40%;
+    aspect-ratio: 1;
+    background: #fff;
+    border-radius: 9%;
+    transform: translateY(-14%);
+  }
+
+  /* Les deux leviers, testables sans installer l'extension. */
+  body.limited img { dynamic-range-limit: standard; }
+  body.reveal img:hover { dynamic-range-limit: no-limit; }
+
+  .missing {
+    display: none;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--flag);
+    border: 1px solid var(--flag);
+    padding: 14px 16px;
+  }
+
+  footer {
+    margin-top: 52px;
+    padding-top: 18px;
+    border-top: 3px double var(--ink);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--faint);
+    line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">HDR Off · banc d'essai</div>
+    <h1>Une image plus lumineuse que le blanc</h1>
+    <p class="standfirst">Une mire calibrée à 1000 nits, posée au milieu d'un texte qui n'a rien demandé.</p>
+  </header>
+
+  <div class="console">
+    <div class="diag"><b>Écran HDR</b><span id="d-screen">…</span></div>
+    <div class="diag"><b>Propriété CSS</b><span id="d-prop">…</span></div>
+    <div class="diag"><b>État</b><span id="d-state">HDR libre</span></div>
+    <div class="btns">
+      <button id="b-limit" aria-pressed="false">Neutraliser le HDR</button>
+      <button id="b-reveal" aria-pressed="false">Révéler au survol</button>
+    </div>
+  </div>
+
+  <div class="missing" id="missing">
+    mire-hdr.avif introuvable.<br />
+    Le fichier doit être placé à côté de cette page.
+  </div>
+
+  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+
+  <p>Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.</p>
+
+  <p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit.</p>
+
+  <figure>
+    <img id="mire" src="mire-hdr.avif" alt="Mire de luminance encodée en PQ" />
+    <figcaption>Fig. 1 — AVIF 10 bits, Rec.2100 PQ. Carré à 1000 nits, fond à 90 nits.</figcaption>
+  </figure>
+
+  <p>Regarde ce paragraphe pendant que la mire est visible. Sur un écran capable de HDR, le système remonte la luminance du carré et compense en abaissant tout le contenu SDR autour, donc ce texte et ce fond crème. Clique sur « Neutraliser le HDR » et le papier doit reprendre sa blancheur d'origine.</p>
+
+  <h2>Comparatif direct</h2>
+
+  <div class="duo">
+    <figure>
+      <img src="mire-hdr.avif" alt="Version HDR" />
+      <figcaption>HDR · PQ 1000 nits</figcaption>
+    </figure>
+    <figure>
+      <div class="twin"></div>
+      <figcaption>SDR · plafonné au blanc écran</figcaption>
+    </figure>
+  </div>
+
+  <p>À droite, le même dessin reconstruit en CSS, donc borné au blanc de l'écran. Si les deux carrés te paraissent identiques, soit ton écran n'a pas de marge de luminance disponible, soit le navigateur ne rend pas le HDR, soit la neutralisation est déjà active.</p>
+
+  <h2>Quod erat demonstrandum</h2>
+
+  <p>At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis praesentium voluptatum deleniti atque corrupti quos dolores et quas molestias excepturi sint occaecati cupiditate non provident, similique sunt in culpa qui officia deserunt mollitia animi.</p>
+
+  <p>Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Itaque earum rerum hic tenetur a sapiente delectus, ut aut reiciendis voluptatibus maiores alias consequatur aut perferendis doloribus asperiores repellat.</p>
+
+  <footer>
+    Protocole : Chrome ou Safari, sur un écran HDR, en plein écran.<br />
+    Baisser la luminosité écran augmente la marge disponible, donc l'effet.<br />
+    Le mode économie d'énergie de macOS supprime le HDR.
+  </footer>
+
+</div>
+
+<script>
+  const b = document.body;
+  const $ = (id) => document.getElementById(id);
+
+  $("d-screen").textContent = matchMedia("(dynamic-range: high)").matches
+    ? "✔ marge HDR disponible"
+    : "✘ aucune marge détectée";
+
+  $("d-prop").textContent = CSS.supports("dynamic-range-limit", "standard")
+    ? "✔ dynamic-range-limit supporté"
+    : "✘ non supporté par ce navigateur";
+
+  $("mire").addEventListener("error", () => {
+    $("missing").style.display = "block";
+  });
+
+  function sync() {
+    $("d-state").textContent = b.classList.contains("limited")
+      ? "HDR plafonné au blanc SDR"
+      : "HDR libre";
+  }
+
+  $("b-limit").addEventListener("click", (e) => {
+    const on = b.classList.toggle("limited");
+    e.currentTarget.setAttribute("aria-pressed", String(on));
+    sync();
+  });
+
+  $("b-reveal").addEventListener("click", (e) => {
+    const on = b.classList.toggle("reveal");
+    e.currentTarget.setAttribute("aria-pressed", String(on));
+  });
+</script>
+</body>
+</html>
