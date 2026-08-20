@@ -1,0 +1,46 @@
+name: Pages
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - "test/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Une seule publication a la fois, sans annuler celle en cours.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verifier la presence de la mire
+        run: |
+          test -f test/mire-hdr.avif \
+            || echo "::warning::mire-hdr.avif absent, la demo affichera un bandeau d'erreur"
+
+      - uses: actions/configure-pages@v5
+
+      - name: Preparer l'artefact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Le contenu de test/ devient la racine du site.
+          path: test
+
+      - name: Deployer
+        id: deployment
+        uses: actions/deploy-pages@v4
