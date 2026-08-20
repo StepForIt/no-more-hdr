@@ -1,4 +1,4 @@
-# HDR Off
+# No More HDR
 
 Extension Chrome qui empêche les images HDR de forcer le reste de la page à s'assombrir.
 
@@ -36,7 +36,7 @@ L'extension injecte cette règle au plus tôt dans le cycle de chargement, avec 
 Pas encore publiée sur le Chrome Web Store.
 
 ```
-1. git clone https://github.com/StepForIt/hdr-off.git
+1. git clone -b dev https://github.com/StepForIt/no-more-hdr.git
 2. chrome://extensions
 3. activer "Mode développeur"
 4. "Charger l'extension non empaquetée" → dossier extension/
@@ -99,13 +99,13 @@ L'extension est au format Manifest V3, donc utilisable telle quelle sur tous les
 
 Le dossier `test/` contient une page autonome, à ouvrir en double-clic.
 
-Elle embarque une mire calibrée : un AVIF 10 bits en Rec.2100 PQ, dont le carré central est encodé à 1000 nits et le fond à 90 nits, soit environ 3,3 diaphragmes d'écart. La mire est posée au milieu d'un texte ordinaire, de façon à rendre visible l'assombrissement du contenu autour.
+Elle affiche une mire calibrée : un AVIF 10 bits en Rec.2100 PQ, dont le carré central est encodé à 1000 nits et le fond à 90 nits, soit environ 3,3 diaphragmes d'écart. La mire est posée au milieu d'un texte ordinaire, de façon à rendre visible l'assombrissement du contenu autour.
 
 La page fournit aussi :
 
 - un diagnostic (`(dynamic-range: high)` et `CSS.supports`) qui dit si l'écran et le navigateur sont concernés
 - deux boutons qui appliquent les règles en direct, sans installer l'extension
-- une comparaison HDR / SDR côte à côte du même dessin
+- une comparaison entre la mire HDR et son jumeau SDR reconstruit en CSS
 
 Protocole de test :
 
@@ -115,6 +115,10 @@ Protocole de test :
 3. mode économie d'énergie désactivé → macOS coupe le HDR sinon
 4. observer le fond de page pendant que la mire est à l'écran
 ```
+
+## Branches
+
+Le développement se fait sur `dev`.
 
 ## Limites connues
 
