@@ -2,6 +2,10 @@
 
 Extension Chrome qui empêche les images HDR de forcer le reste de la page à s'assombrir.
 
+**Démo en ligne : [stepforit.github.io/no-more-hdr](https://stepforit.github.io/no-more-hdr/)**
+
+Le banc d'essai fonctionne sans rien installer. Il te dit si ton écran est concerné et te laisse activer la neutralisation en direct.
+
 ## Le problème
 
 Une image encodée en HDR ne se contente pas d'être plus lumineuse. Elle demande au compositeur de l'OS une marge de luminance supplémentaire, et l'OS la lui accorde en abaissant tout le contenu SDR autour. Un seul visuel dans un fil d'actualité suffit à ternir la page entière.
@@ -33,14 +37,50 @@ L'extension injecte cette règle au plus tôt dans le cycle de chargement, avec 
 
 ## Installation
 
-Pas encore publiée sur le Chrome Web Store.
+L'extension n'est pas encore publiée sur le Chrome Web Store. Elle se charge donc en mode développeur, ce qui prend une minute et ne présente aucun risque : le code tient en trois fichiers, tous lisibles dans `extension/`.
 
+### 1. Récupérer les fichiers
+
+Deux options, au choix.
+
+**Depuis une release** (recommandé)
+
+Télécharger le `.zip` de la [dernière release](https://github.com/StepForIt/no-more-hdr/releases), puis le décompresser. Le dossier obtenu contient directement `manifest.json`.
+
+**Depuis les sources**
+
+```bash
+git clone -b dev https://github.com/StepForIt/no-more-hdr.git
 ```
-1. git clone -b dev https://github.com/StepForIt/no-more-hdr.git
-2. chrome://extensions
-3. activer "Mode développeur"
-4. "Charger l'extension non empaquetée" → dossier extension/
-```
+
+Le dossier à charger sera `no-more-hdr/extension`.
+
+### 2. Charger dans le navigateur
+
+| Navigateur | Adresse à ouvrir |
+|---|---|
+| Chrome | `chrome://extensions` |
+| Edge | `edge://extensions` |
+| Brave | `brave://extensions` |
+| Arc, Opera, Vivaldi | `chrome://extensions` |
+
+Puis :
+
+1. Activer **Mode développeur**, en haut à droite sur Chrome, dans le menu de gauche sur Edge.
+2. Cliquer **Charger l'extension non empaquetée**.
+3. Sélectionner le dossier contenant `manifest.json`, pas le fichier lui-même.
+4. L'icône apparaît dans la barre d'outils. L'épingler la rend accessible en un clic.
+
+### 3. Vérifier que ça marche
+
+Ouvrir la [démo](https://stepforit.github.io/no-more-hdr/) ou un fil LinkedIn, puis cliquer sur l'icône de l'extension. Le popup doit afficher le nom de domaine et l'état de neutralisation.
+
+S'il affiche « page interne du navigateur », c'est que l'onglet actif est une page `chrome://`. L'extension n'agit que sur des pages web réelles, ouvre un vrai site et réessaie.
+
+### Notes
+
+- Une extension chargée en mode développeur reste active après redémarrage, mais Chrome affiche un avertissement au lancement. Il se referme sans conséquence.
+- Après modification du code, il faut cliquer l'icône de rechargement sur la carte de l'extension, puis recharger les onglets concernés.
 
 ## Deux modèles de ciblage
 
@@ -95,9 +135,9 @@ Un `MutationObserver` surveille `documentElement` : certaines SPA reconstruisent
 
 L'extension est au format Manifest V3, donc utilisable telle quelle sur tous les navigateurs Chromium.
 
-## Page de test
+## Banc d'essai
 
-Le dossier `test/` contient une page autonome, à ouvrir en double-clic.
+Le dossier `test/` contient la page publiée sur GitHub Pages. Elle s'ouvre aussi en double-clic en local.
 
 Elle affiche une mire calibrée : un AVIF 10 bits en Rec.2100 PQ, dont le carré central est encodé à 1000 nits et le fond à 90 nits, soit environ 3,3 diaphragmes d'écart. La mire est posée au milieu d'un texte ordinaire, de façon à rendre visible l'assombrissement du contenu autour.
 
@@ -116,9 +156,17 @@ Protocole de test :
 4. observer le fond de page pendant que la mire est à l'écran
 ```
 
-## Branches
+## Développement
 
-Le développement se fait sur `dev`.
+Le travail se fait sur `dev`.
+
+| Workflow | Déclencheur | Produit |
+|---|---|---|
+| `package.yml` | push sur `dev`, PR | Zip de l'extension en artefact |
+| `package.yml` | tag `v*` | Release GitHub avec le zip attaché |
+| `pages.yml` | modification de `test/` | Publication du banc d'essai |
+
+Le zip est fabriqué depuis l'intérieur de `extension/`, le `manifest.json` se retrouve donc à la racine de l'archive, comme l'exige le Chrome Web Store. La CI refuse un tag dont le numéro ne correspond pas à la version du manifest.
 
 ## Limites connues
 
