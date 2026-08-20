@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "HDR Off",
+  "version": "1.0.0",
+  "description": "Neutralise les images HDR qui forcent le reste de la page a s'assombrir. Ciblage par site, revelation au survol.",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "HDR Off"
+  },
+  "homepage_url": "https://github.com/StepForIt/hdr-off"
+}

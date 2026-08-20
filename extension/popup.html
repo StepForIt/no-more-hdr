@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --fg: #e8e6e1;
+    --dim: #6b6862;
+    --line: #232327;
+    --hot: #ff4d3d;
+    --ok: #43d18c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    width: 300px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "IBM Plex Mono", SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.45;
+    padding: 18px 16px 14px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* halo : rappel visuel de exactement ce qu'on neutralise */
+  body::before {
+    content: "";
+    position: absolute;
+    top: -74px; right: -74px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, var(--hot) 0%, transparent 68%);
+    opacity: .15;
+    filter: blur(15px);
+    pointer-events: none;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 12px;
+    margin-bottom: 4px;
+  }
+
+  h1 { font-size: 15px; font-weight: 600; letter-spacing: -.4px; }
+  .ver { color: var(--dim); font-size: 10px; }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 0;
+  }
+  .row + .row { border-top: 1px solid var(--line); }
+
+  .k { color: var(--dim); text-transform: uppercase; letter-spacing: .8px; font-size: 10px; }
+  .k small { display: block; text-transform: none; letter-spacing: 0; color: #4a4842; font-size: 9.5px; }
+
+  .sw {
+    flex: none;
+    width: 38px; height: 21px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: #17171a;
+    position: relative;
+    cursor: pointer;
+    transition: background .18s, border-color .18s;
+  }
+  .sw::after {
+    content: "";
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 15px; height: 15px;
+    border-radius: 50%;
+    background: var(--dim);
+    transition: transform .18s cubic-bezier(.3,.8,.4,1), background .18s;
+  }
+  .sw[data-on="true"] { background: #10231a; border-color: #1f4a35; }
+  .sw[data-on="true"]::after { transform: translateX(17px); background: var(--ok); }
+
+  .seg { display: flex; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; flex: none; }
+  .seg button {
+    background: transparent; border: 0; color: var(--dim);
+    font-family: inherit; font-size: 10px; letter-spacing: .5px;
+    padding: 5px 10px; cursor: pointer; transition: color .15s, background .15s;
+  }
+  .seg button[data-active="true"] { background: var(--fg); color: var(--bg); }
+
+  #site {
+    margin-top: 12px;
+    padding: 11px 12px;
+    border: 1px dashed var(--line);
+    border-radius: 5px;
+  }
+
+  .host { font-size: 13px; word-break: break-all; }
+  .state { font-size: 10px; color: var(--dim); margin: 3px 0 10px; }
+  .state[data-on="true"] { color: var(--ok); }
+
+  .act {
+    width: 100%; padding: 8px;
+    border: 1px solid var(--line); border-radius: 4px;
+    background: transparent; color: var(--fg);
+    font-family: inherit; font-size: 11px; letter-spacing: .3px;
+    cursor: pointer; transition: background .15s, border-color .15s;
+  }
+  .act:hover:not(:disabled) { background: #17171a; border-color: #33333a; }
+  .act:disabled { opacity: .35; cursor: default; }
+
+  footer {
+    margin-top: 13px; padding-top: 11px;
+    border-top: 1px solid var(--line);
+    color: var(--dim); font-size: 10px; line-height: 1.65;
+  }
+  code { color: #9b978f; }
+  a { color: var(--dim); }
+</style>
+</head>
+<body>
+  <header>
+    <h1>HDR Off</h1>
+    <span class="ver">v1.0</span>
+  </header>
+
+  <div class="row">
+    <span class="k">Extension</span>
+    <div class="sw" id="enabled" data-on="true"></div>
+  </div>
+
+  <div class="row">
+    <span class="k">Ciblage<small id="mode-hint">actif partout sauf exceptions</small></span>
+    <div class="seg">
+      <button id="m-everywhere" data-active="true">Partout</button>
+      <button id="m-list">Liste</button>
+    </div>
+  </div>
+
+  <div class="row">
+    <span class="k">Révéler au survol<small>rend le HDR à l'image pointée</small></span>
+    <div class="sw" id="reveal" data-on="true"></div>
+  </div>
+
+  <div id="site">
+    <div class="host" id="host">—</div>
+    <div class="state" id="state">—</div>
+    <button class="act" id="toggle-site">—</button>
+  </div>
+
+  <footer>
+    Applique <code>dynamic-range-limit</code>.<br />
+    Recharge l'onglet pour voir l'effet.
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>
