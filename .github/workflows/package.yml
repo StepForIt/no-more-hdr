@@ -1,0 +1,74 @@
+name: Package
+
+on:
+  push:
+    branches: [dev]
+    tags: ["v*"]
+  pull_request:
+    branches: [dev]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lire la version du manifest
+        id: meta
+        run: |
+          VERSION=$(jq -r .version extension/manifest.json)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Version du manifest : $VERSION"
+
+      - name: Valider le manifest
+        run: |
+          jq empty extension/manifest.json
+          test "$(jq -r .manifest_version extension/manifest.json)" = "3" \
+            || { echo "manifest_version doit valoir 3"; exit 1; }
+          for f in $(jq -r '.content_scripts[].js[]' extension/manifest.json); do
+            test -f "extension/$f" || { echo "fichier manquant : $f"; exit 1; }
+          done
+          POPUP=$(jq -r .action.default_popup extension/manifest.json)
+          test -f "extension/$POPUP" || { echo "popup manquant : $POPUP"; exit 1; }
+
+      - name: Verifier la syntaxe JS
+        run: |
+          for f in extension/*.js; do
+            node --check "$f"
+          done
+
+      - name: Coherence tag / manifest
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MANIFEST="${{ steps.meta.outputs.version }}"
+          test "$TAG" = "$MANIFEST" \
+            || { echo "tag $TAG != manifest $MANIFEST"; exit 1; }
+
+      - name: Empaqueter
+        run: |
+          # Le zip du Chrome Web Store doit avoir le manifest a sa racine,
+          # donc on zippe depuis l'interieur du dossier extension/.
+          cd extension
+          zip -r "../no-more-hdr-${{ steps.meta.outputs.version }}.zip" . -x ".*"
+          cd ..
+          unzip -l "no-more-hdr-${{ steps.meta.outputs.version }}.zip"
+
+      - name: Publier l'artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: no-more-hdr-${{ steps.meta.outputs.version }}
+          path: no-more-hdr-${{ steps.meta.outputs.version }}.zip
+          if-no-files-found: error
+
+      - name: Creer la release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: no-more-hdr-${{ steps.meta.outputs.version }}.zip
+          generate_release_notes: true
