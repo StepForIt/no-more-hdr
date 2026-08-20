@@ -18,6 +18,8 @@ const $ = (id) => document.getElementById(id);
 let cfg = { ...DEFAULTS };
 let host = null;
 let tabId = null;
+// Pourquoi il n'y a pas de host : page interne du navigateur, ou URL illisible.
+let reason = null;
 
 const matches = (h, p) => h === p || h.endsWith("." + p);
 
@@ -46,12 +48,12 @@ function render() {
       ? "actif uniquement sur la liste"
       : "actif partout sauf exceptions";
 
-  $("host").textContent = host || "page non supportée";
+  $("host").textContent = host || "page interne du navigateur";
 
   const on = neutralised();
   $("state").dataset.on = String(on);
   $("state").textContent = !host
-    ? "—"
+    ? reason || "rien à neutraliser ici"
     : !cfg.enabled
     ? "extension désactivée"
     : on
@@ -60,14 +62,15 @@ function render() {
 
   const btn = $("toggle-site");
   btn.disabled = !host || !cfg.enabled;
-  btn.textContent =
-    cfg.mode === "list"
-      ? listed()
-        ? "Retirer de la liste"
-        : "Neutraliser sur ce site"
-      : listed()
-      ? "Neutraliser sur ce site"
-      : "Autoriser le HDR ici";
+  btn.textContent = !host
+    ? "Ouvre une page web pour agir"
+    : cfg.mode === "list"
+    ? listed()
+      ? "Retirer de la liste"
+      : "Neutraliser sur ce site"
+    : listed()
+    ? "Neutraliser sur ce site"
+    : "Autoriser le HDR ici";
 }
 
 function save() {
@@ -81,10 +84,23 @@ chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   const tab = tabs[0];
   if (!tab) return;
   tabId = tab.id;
-  try {
-    const u = new URL(tab.url);
-    if (u.protocol.startsWith("http")) host = u.hostname.replace(/^www\./, "");
-  } catch (_) {}
+
+  if (!tab.url) {
+    // Sans permission lisible sur cet onglet, Chrome renvoie une URL vide.
+    reason = "URL de l'onglet illisible";
+  } else {
+    try {
+      const u = new URL(tab.url);
+      if (u.protocol.startsWith("http")) {
+        host = u.hostname.replace(/^www\./, "");
+      } else {
+        reason = u.protocol.replace(":", "") + " : hors périmètre";
+      }
+    } catch (_) {
+      reason = "URL de l'onglet illisible";
+    }
+  }
+
   chrome.storage.sync.get(DEFAULTS, (stored) => {
     cfg = stored;
     render();
