@@ -52,6 +52,21 @@
 
   .standfirst { font-size: 18px; color: var(--faint); font-style: italic; }
 
+  /* Lien depot, visible des le premier ecran. */
+  .repo {
+    display: inline-block;
+    margin-top: 18px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    letter-spacing: .3px;
+    color: var(--ink);
+    text-decoration: none;
+    border: 1px solid var(--ink);
+    padding: 8px 14px;
+    transition: background .14s, color .14s;
+  }
+  .repo:hover { background: var(--ink); color: var(--paper); }
+
   .console {
     font-family: "IBM Plex Mono", monospace;
     font-size: 12px;
@@ -150,8 +165,8 @@
     background: #fbf9f4;
   }
   .cta h2 { margin-top: 0; padding-top: 0; border-top: 0; }
-  .cta p:last-child { margin-bottom: 0; }
-  .cta a { color: var(--flag); }
+  .cta p { margin-bottom: 14px; }
+  .cta .repo { margin-top: 4px; }
 
   footer {
     margin-top: 52px;
@@ -162,6 +177,7 @@
     color: var(--faint);
     line-height: 1.8;
   }
+  footer a { color: var(--flag); }
 </style>
 </head>
 <body>
@@ -171,6 +187,7 @@
     <div class="kicker">No More HDR · banc d'essai</div>
     <h1>Une image plus lumineuse que le blanc</h1>
     <p class="standfirst">Une mire calibrée à 1000 nits, posée au milieu d'un texte qui n'a rien demandé.</p>
+    <a class="repo" href="https://github.com/StepForIt/no-more-hdr">Code et extension sur GitHub →</a>
   </header>
 
   <div class="console">
@@ -224,13 +241,15 @@
 
   <div class="cta">
     <h2>Récupérer l'extension</h2>
-    <p>Le code, les instructions d'installation et les paquets sont sur <a href="https://github.com/StepForIt/no-more-hdr">github.com/StepForIt/no-more-hdr</a>. C'est gratuit, open source, et il n'y a aucun compte à créer.</p>
+    <p>Le code, les instructions d'installation et les paquets prêts à charger sont sur le dépôt. C'est gratuit, open source, et il n'y a aucun compte à créer.</p>
+    <a class="repo" href="https://github.com/StepForIt/no-more-hdr">github.com/StepForIt/no-more-hdr →</a>
   </div>
 
   <footer>
     Protocole : Chrome ou Safari, sur un écran HDR, en plein écran.<br />
     Baisser la luminosité écran augmente la marge disponible, donc l'effet.<br />
-    Le mode économie d'énergie de macOS supprime le HDR.
+    Le mode économie d'énergie de macOS supprime le HDR.<br />
+    <a href="https://github.com/StepForIt/no-more-hdr">github.com/StepForIt/no-more-hdr</a>
   </footer>
 
 </div>
