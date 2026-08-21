@@ -96,8 +96,17 @@
     cursor: pointer;
     transition: background .14s, color .14s;
   }
-  button:hover { background: var(--ink); color: var(--paper); }
+  button:hover:not(:disabled) { background: var(--ink); color: var(--paper); }
   button[aria-pressed="true"] { background: var(--flag); border-color: var(--flag); color: #fff; }
+  button:disabled { opacity: .35; cursor: not-allowed; border-color: var(--faint); color: var(--faint); }
+
+  .note {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--faint);
+    margin-top: 9px;
+    line-height: 1.5;
+  }
 
   .hint {
     font-size: 15.5px;
@@ -161,9 +170,9 @@
     transform: translateY(-14%);
   }
 
-  /* Les deux leviers, testables sans installer l'extension. */
+  /* Neutralisation. La revelation au survol n'a de sens que par-dessus. */
   body.limited img { dynamic-range-limit: standard; }
-  body.reveal img:hover { dynamic-range-limit: no-limit; }
+  body.limited.reveal img:hover { dynamic-range-limit: no-limit; }
 
   .missing {
     display: none;
@@ -224,8 +233,9 @@
       <div class="diag"><b>État</b><span id="d-state">HDR libre</span></div>
       <div class="btns">
         <button id="b-limit" aria-pressed="false">Neutraliser le HDR</button>
-        <button id="b-reveal" aria-pressed="false">Révéler au survol</button>
+        <button id="b-reveal" aria-pressed="false" disabled>Révéler au survol</button>
       </div>
+      <div class="note" id="note">Le survol ne sert qu'une fois la neutralisation active.</div>
     </div>
   </div>
 
@@ -294,22 +304,58 @@
     $("missing").style.display = "block";
   });
 
+  function limited() { return b.classList.contains("limited"); }
+  function reveal() { return b.classList.contains("reveal"); }
+
   function sync() {
-    $("d-state").textContent = b.classList.contains("limited")
-      ? "HDR plafonné au blanc SDR"
-      : "HDR libre";
+    $("d-state").textContent = !limited()
+      ? "HDR libre"
+      : reveal()
+      ? "plafonné, sauf l'image survolée"
+      : "plafonné au blanc SDR";
+
+    // Le survol n'a rien a reveler tant que rien n'est plafonne.
+    $("b-reveal").disabled = !limited();
+    $("note").textContent = !limited()
+      ? "Le survol ne sert qu'une fois la neutralisation active."
+      : reveal()
+      ? "Pointez la mire : elle doit retrouver son éclat."
+      : "Activez le survol, puis pointez la mire.";
   }
 
   $("b-limit").addEventListener("click", (e) => {
     const on = b.classList.toggle("limited");
     e.currentTarget.setAttribute("aria-pressed", String(on));
+    if (!on) {
+      // On coupe le survol avec la neutralisation, sinon l'etat est incoherent.
+      b.classList.remove("reveal");
+      $("b-reveal").setAttribute("aria-pressed", "false");
+    }
     sync();
   });
 
   $("b-reveal").addEventListener("click", (e) => {
     const on = b.classList.toggle("reveal");
     e.currentTarget.setAttribute("aria-pressed", String(on));
+    sync();
   });
+
+  // Chrome ne redessine pas toujours une image deja tonemappee sur un simple
+  // :hover. On force le recalcul en posant la valeur en style inline, qui
+  // l'emporte sur la feuille de style et declenche un nouveau rendu.
+  document.querySelectorAll("img").forEach((img) => {
+    img.addEventListener("mouseenter", () => {
+      if (limited() && reveal()) {
+        img.style.dynamicRangeLimit = "no-limit";
+        void img.offsetWidth;
+      }
+    });
+    img.addEventListener("mouseleave", () => {
+      img.style.dynamicRangeLimit = "";
+    });
+  });
+
+  sync();
 </script>
 </body>
 </html>
